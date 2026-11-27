@@ -19,7 +19,8 @@ Métriques exposées (étiquettes communes `app="todo-api"`, `env="staging"|"pro
 
 1. Grafana Cloud (offre gratuite) → _Connections → Add new connection → Metrics Endpoint_.
 2. Créer un job par environnement :
-   - URL : `https://api.todo.bazardim.fr/metrics` (et `https://api.staging.todo.bazardim.fr/metrics`)
+   - URL : `https://todo-api-prod.onrender.com/metrics` (et `https://todo-api-staging.onrender.com/metrics`) —
+     `/metrics` n'est pas relayé par le frontend, il est appelé directement sur le service API
    - Authentification : Bearer, valeur = `METRICS_TOKEN` du service Render
    - Intervalle : 60 s
 3. Créer un tableau de bord avec les requêtes ci-dessous.

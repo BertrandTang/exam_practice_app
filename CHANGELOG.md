@@ -6,6 +6,15 @@ Les références `S#` (sécurité) et `B#` (bugs) renvoient à l'audit initial.
 
 ## [Non publié]
 
+### Modifié
+
+- Render : le frontend relaie `/api/*` vers le service API (règle _rewrite_) au lieu d'exposer l'API sur son propre
+  domaine. L'offre gratuite limite le compte à 2 domaines personnalisés ; un seul domaine par environnement garde
+  le cookie de session interne au site (pas de cookie tiers, pas de CORS entre front et API).
+- CI : tags d'image Docker valides sur les pull requests, actions GitHub mises à jour (fin du runtime Node 20).
+- Tests : identifiants et secrets générés aléatoirement à chaque exécution (plus aucune valeur écrite en dur).
+- Logs : en niveau `debug`, la chaîne `X-Forwarded-For` est journalisée pour régler `TRUST_PROXY`.
+
 ## [1.0.0] — 2026-11-27
 
 ### Sécurité (E28)
