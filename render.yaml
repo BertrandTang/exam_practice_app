@@ -1,0 +1,138 @@
+# Infrastructure Render (Blueprint) : 2 environnements × (API + frontend).
+#
+#   Préproduction (branche develop)        Production (branche main)
+#   staging.todo.bazardim.fr               todo.bazardim.fr
+#   api.staging.todo.bazardim.fr           api.todo.bazardim.fr
+#
+# Les déploiements sont déclenchés par la CI (deploy hooks), pas à chaque commit.
+# Secrets : MONGO_URI est saisi dans le dashboard (sync: false) ;
+# JWT_SECRET et METRICS_TOKEN sont générés aléatoirement par Render.
+
+services:
+  # ------------------------------------------------------------ Préproduction
+  - type: web
+    name: todo-api-staging
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: develop
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    healthCheckPath: /health
+    autoDeployTrigger: 'off'
+    domains:
+      - api.staging.todo.bazardim.fr
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: METRICS_TOKEN
+        generateValue: true
+      - key: APP_ENV
+        value: staging
+      - key: CORS_ORIGIN
+        value: https://staging.todo.bazardim.fr
+      - key: TRUST_PROXY
+        value: '1'
+      - key: LOG_LEVEL
+        value: debug
+
+  - type: web
+    name: todo-front-staging
+    runtime: static
+    branch: develop
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    autoDeployTrigger: 'off'
+    domains:
+      - staging.todo.bazardim.fr
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+      - key: VITE_API_URL
+        value: https://api.staging.todo.bazardim.fr/api
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: Content-Security-Policy
+        value: "default-src 'self'; connect-src 'self' https://api.staging.todo.bazardim.fr; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+
+  # --------------------------------------------------------------- Production
+  - type: web
+    name: todo-api-prod
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: main
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    healthCheckPath: /health
+    autoDeployTrigger: 'off'
+    domains:
+      - api.todo.bazardim.fr
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: METRICS_TOKEN
+        generateValue: true
+      - key: APP_ENV
+        value: production
+      - key: CORS_ORIGIN
+        value: https://todo.bazardim.fr
+      - key: TRUST_PROXY
+        value: '1'
+      - key: LOG_LEVEL
+        value: info
+
+  - type: web
+    name: todo-front-prod
+    runtime: static
+    branch: main
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    autoDeployTrigger: 'off'
+    domains:
+      - todo.bazardim.fr
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+      - key: VITE_API_URL
+        value: https://api.todo.bazardim.fr/api
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: Content-Security-Policy
+        value: "default-src 'self'; connect-src 'self' https://api.todo.bazardim.fr; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
