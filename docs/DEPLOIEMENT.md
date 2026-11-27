@@ -87,6 +87,15 @@ curl -s https://todo.bazardim.fr/api/auth/me             # API via le relais : 4
 
 Puis [SSL Labs](https://www.ssllabs.com/ssltest/) sur chaque domaine (objectif : note A).
 
+**IP du client** : une requête relayée traverse plusieurs proxys (Cloudflare, relais du frontend, réseau interne
+Render), visibles dans `X-Forwarded-For` (journalisé en préproduction, niveau `debug`). Le nombre de sauts varie
+selon que l'API est appelée directement ou via le frontend : `TRUST_PROXY` liste donc les plages de confiance
+(réseau privé, [plages Cloudflare](https://www.cloudflare.com/ips/), relais Render) plutôt qu'un nombre fixe.
+Express retient la première adresse non fiable en partant de la droite : l'IP réelle, non usurpable par un
+en-tête forgé. Sans ce réglage, tous les clients partageraient l'IP interne de Render et la limitation des
+tentatives de connexion bloquerait tout le monde à la fois. Si Render change d'infrastructure, vérifier les logs
+de préproduction et ajuster la liste.
+
 > Le cookie de session est `SameSite=Lax` et sans attribut `Domain` : il est rattaché au domaine du frontend,
 > qui relaie les appels `/api/*`. Le navigateur ne voit qu'une seule origine.
 
