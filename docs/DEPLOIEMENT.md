@@ -8,7 +8,7 @@ Navigateur ──HTTPS──▶│ Static Site (React)   todo.bazardim.fr       
                      │   /api/* ──rewrite──▶ Web Service Docker                  │──TLS──▶ MongoDB Atlas (M0)
                      │                       todo-api-prod-cob9.onrender.com          │
                      └───────────────────────────────────────────────────────────┘
-DNS : zone bazardim.fr chez OVH (CNAME)   Certificats : Let's Encrypt, gérés par Render
+DNS : zone bazardim.fr chez OVH (CNAME)   Certificats : TLS gérés par Render (Google Trust Services)
 ```
 
 Deux environnements identiques et isolés (services, base et secrets distincts) :
@@ -73,8 +73,10 @@ et un cookie de session interne au site — un front sur `bazardim.fr` appelant 
 ferait du cookie un cookie tiers, bloqué par Safari.
 
 Les cibles exactes sont affichées par Render (_Settings → Custom Domains_) : si un nom est déjà pris, Render ajoute un
-suffixe. La zone ne contient aucun enregistrement **CAA**, donc Let's Encrypt est autorisé par défaut. Render émet puis renouvelle automatiquement les certificats Let's Encrypt et
-redirige HTTP vers HTTPS.
+suffixe. La zone ne contient aucun enregistrement **CAA**, donc toute autorité de certification est autorisée. Render émet puis
+renouvelle automatiquement les certificats (émis par Google Trust Services pour ces domaines, valables 90 jours) et
+redirige HTTP vers HTTPS (301). Vérifié le 27/11/2026 : `todo.bazardim.fr` et `staging.todo.bazardim.fr` en HTTP/2,
+certificat valide jusqu'au 25/02/2027.
 
 **Vérifications**
 
