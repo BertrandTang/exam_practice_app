@@ -1,28 +1,54 @@
-// Point d'entrée du serveur backend
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const connectDB = require('./config/db');
+/**
+ * Point d'entrée : connexion à MongoDB puis démarrage du serveur HTTP.
+ * Gère l'arrêt propre (SIGTERM envoyé par Docker / Render) et journalise
+ * les erreurs non interceptées avant de quitter.
+ * @module server
+ */
+let env;
+try {
+  env = require('./config/env');
+} catch (err) {
+  // Le logger dépend de la configuration : on ne peut utiliser que la console ici.
+  // eslint-disable-next-line no-console
+  console.error(JSON.stringify({ level: 'error', message: err.message }));
+  process.exit(1);
+}
 
-// Connexion à la base de données
-connectDB();
+const logger = require('./config/logger');
 
-const app = express();
+const app = require('./app');
+const { connectDB, disconnectDB } = require('./config/db');
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+/**
+ * Démarre l'API.
+ * @returns {Promise<void>}
+ */
+async function start() {
+  await connectDB(env.mongoUri);
+  const server = app.listen(env.port, () => {
+    logger.info('Serveur démarré', { port: env.port, nodeEnv: env.nodeEnv });
+  });
 
-// Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/tasks', require('./routes/tasks'));
+  const shutdown = (signal) => {
+    logger.info('Arrêt du serveur', { signal });
+    server.close(async () => {
+      await disconnectDB();
+      process.exit(0);
+    });
+  };
+  process.on('SIGTERM', shutdown);
+  process.on('SIGINT', shutdown);
+}
 
-// Ce handler ne catch que les erreurs synchrones. Les erreurs dans les promesses ne sont pas gérées.
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
+process.on('unhandledRejection', (reason) => {
+  logger.error('unhandled_rejection', { reason: String(reason) });
+});
+process.on('uncaughtException', (err) => {
+  logger.error('uncaught_exception', { error: err.message, stack: err.stack });
+  process.exit(1);
 });
 
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+start().catch((err) => {
+  logger.error('Échec du démarrage', { error: err.message });
+  process.exit(1);
+});

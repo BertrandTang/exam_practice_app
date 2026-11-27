@@ -1,0 +1,55 @@
+# Environnement complet en conteneurs : MongoDB + API + frontend.
+#   cp .env.example .env   (puis renseigner JWT_SECRET)
+#   docker compose up --build
+# Frontend : http://localhost:8080 — API : http://localhost:5050 (5000 est pris par AirPlay sur macOS)
+name: todo-app
+
+services:
+  mongo:
+    image: mongo:8
+    restart: unless-stopped
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ['CMD', 'mongosh', '--quiet', '--eval', "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # Port non exposé : la base n'est accessible qu'aux conteneurs du réseau
+
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      APP_ENV: docker-local
+      PORT: 5000
+      MONGO_URI: mongodb://mongo:27017/exam_practice_db
+      JWT_SECRET: ${JWT_SECRET:?Définir JWT_SECRET dans le fichier .env à la racine}
+      CORS_ORIGIN: http://localhost:8080
+      # HTTP en local : cookie non "secure" (HTTPS en préprod / prod)
+      COOKIE_SECURE: 'false'
+      METRICS_TOKEN: ${METRICS_TOKEN:-}
+      LOG_LEVEL: info
+    ports:
+      - '5050:5000'
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:5050/api
+    restart: unless-stopped
+    environment:
+      API_ORIGIN: http://localhost:5050
+    ports:
+      - '8080:8080'
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  mongo-data:
