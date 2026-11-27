@@ -2,7 +2,7 @@
 #
 #   Préproduction (branche develop)        Production (branche main)
 #   staging.todo.bazardim.fr               todo.bazardim.fr
-#   └─ /api/* → todo-api-staging.onrender.com  └─ /api/* → todo-api-prod.onrender.com
+#   └─ /api/* → todo-api-staging-gs7r.onrender.com  └─ /api/* → todo-api-prod-cob9.onrender.com
 #
 # Le frontend relaie /api/* vers l'API (rewrite Render) : un seul domaine par
 # environnement, donc cookie de session interne au site (SameSite=Lax) et pas
@@ -62,7 +62,7 @@ services:
       # le cookie de session reste interne au site, sans CORS ni cookie tiers.
       - type: rewrite
         source: /api/*
-        destination: https://todo-api-staging.onrender.com/api/*
+        destination: https://todo-api-staging-gs7r.onrender.com/api/*
       - type: rewrite
         source: /*
         destination: /index.html
@@ -129,7 +129,7 @@ services:
       # le cookie de session reste interne au site, sans CORS ni cookie tiers.
       - type: rewrite
         source: /api/*
-        destination: https://todo-api-prod.onrender.com/api/*
+        destination: https://todo-api-prod-cob9.onrender.com/api/*
       - type: rewrite
         source: /*
         destination: /index.html
