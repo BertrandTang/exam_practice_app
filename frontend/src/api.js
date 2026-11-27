@@ -2,8 +2,7 @@
  * Client HTTP de l'API.
  *
  * - L'URL de l'API dépend de l'environnement (VITE_API_URL, fixée au build).
- * - `withCredentials` envoie le cookie de session httpOnly à chaque requête :
- *   le token n'est plus stocké dans localStorage.
+ * - `withCredentials` envoie le cookie de session httpOnly à chaque requête.
  */
 import axios from 'axios';
 

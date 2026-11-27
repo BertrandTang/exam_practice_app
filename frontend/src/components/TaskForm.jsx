@@ -1,9 +1,7 @@
 /**
  * Formulaire de création d'une tâche (titre obligatoire, description facultative).
  *
- * Valide les champs avant l'envoi, affiche l'erreur renvoyée par l'API le
- * cas échéant, et transmet la tâche créée au parent via `onAdd` pour une
- * mise à jour immédiate de la liste.
+ * La tâche créée est transmise au parent via `onAdd`.
  *
  * @param {object} props
  * @param {(task: object) => void} props.onAdd - Appelée avec la tâche créée.

@@ -1,9 +1,8 @@
 /**
  * Routes des tâches : /api/tasks
  *
- * Toutes les routes exigent une session (middleware `auth`) et ne
- * manipulent QUE les tâches de l'utilisateur connecté : chaque requête
- * filtre sur `{ _id, user: req.user.id }` (correction de la faille IDOR).
+ * Toutes les routes exigent une session et filtrent sur `{ _id, user }` :
+ * un utilisateur n'accède qu'à ses propres tâches.
  * @module routes/tasks
  */
 const express = require('express');
@@ -17,9 +16,8 @@ const router = express.Router();
 router.use(auth);
 
 /**
- * Répond 404 lorsqu'une tâche n'existe pas OU appartient à un autre
- * utilisateur (on ne révèle pas son existence), et journalise la
- * tentative d'accès à la tâche d'un autre.
+ * Répond 404 si la tâche n'existe pas ou appartient à un autre utilisateur,
+ * et journalise ce second cas.
  * @param {express.Request} req
  * @param {express.Response} res
  * @returns {Promise<express.Response>}

@@ -1,5 +1,5 @@
 /**
- * Journalisation des requêtes HTTP via Winston (remplace morgan).
+ * Journalisation des requêtes HTTP via Winston.
  * @module middleware/requestLogger
  */
 const logger = require('../config/logger');

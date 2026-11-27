@@ -1,8 +1,6 @@
 /**
  * Page de connexion.
  *
- * Affiche le message d'erreur de l'API en cas d'échec et les messages
- * transmis par la navigation (déconnexion, session expirée).
  * Après connexion, redirige vers la page demandée initialement.
  */
 import { useState } from 'react';
