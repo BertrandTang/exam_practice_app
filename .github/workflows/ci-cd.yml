@@ -139,6 +139,13 @@ jobs:
             echo "::warning::Secret RENDER_DEPLOY_HOOK_API absent : déploiement ignoré (Render pas encore configuré)."
             exit 0
           fi
+          case "$HOOK" in
+            https://api.render.com/deploy/srv-*) ;;
+            *)
+              echo "::error::Secret RENDER_DEPLOY_HOOK_API mal formé : attendu l'URL complète du deploy hook (https://api.render.com/deploy/srv-…?key=…)."
+              exit 1
+              ;;
+          esac
           curl -fsS -X POST "$HOOK" > /dev/null
       - name: Déclencher le déploiement du frontend sur Render
         env:
@@ -148,4 +155,11 @@ jobs:
             echo "::warning::Secret RENDER_DEPLOY_HOOK_FRONT absent : déploiement ignoré (Render pas encore configuré)."
             exit 0
           fi
+          case "$HOOK" in
+            https://api.render.com/deploy/srv-*) ;;
+            *)
+              echo "::error::Secret RENDER_DEPLOY_HOOK_FRONT mal formé : attendu l'URL complète du deploy hook (https://api.render.com/deploy/srv-…?key=…)."
+              exit 1
+              ;;
+          esac
           curl -fsS -X POST "$HOOK" > /dev/null
