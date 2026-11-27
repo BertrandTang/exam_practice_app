@@ -3,10 +3,11 @@
 ## Architecture cible
 
 ```
-                 ┌──────────── Render (région Frankfurt) ────────────┐
-Navigateur ──HTTPS──▶ Static Site (React)    todo.bazardim.fr          │
-           ──HTTPS──▶ Web Service Docker      api.todo.bazardim.fr ──────┼──TLS──▶ MongoDB Atlas (M0)
-                 └────────────────────────────────────────────────────┘
+                     ┌──────────────── Render (région Frankfurt) ────────────────┐
+Navigateur ──HTTPS──▶│ Static Site (React)   todo.bazardim.fr                    │
+                     │   /api/* ──rewrite──▶ Web Service Docker                  │──TLS──▶ MongoDB Atlas (M0)
+                     │                       todo-api-prod.onrender.com          │
+                     └───────────────────────────────────────────────────────────┘
 DNS : zone bazardim.fr chez OVH (CNAME)   Certificats : Let's Encrypt, gérés par Render
 ```
 
@@ -16,7 +17,7 @@ Deux environnements identiques et isolés (services, base et secrets distincts) 
 | ----------- | --------------------------------- | ------------------------------ |
 | Branche Git | `develop`                         | `main`                         |
 | Frontend    | `staging.todo.bazardim.fr`        | `todo.bazardim.fr`             |
-| API         | `api.staging.todo.bazardim.fr`    | `api.todo.bazardim.fr`         |
+| API         | `staging.todo.bazardim.fr/api`    | `todo.bazardim.fr/api`         |
 | Base Atlas  | base + utilisateur `todo-staging` | base + utilisateur `todo-prod` |
 | Déploiement | automatique après la CI           | après approbation manuelle     |
 
@@ -60,12 +61,16 @@ premier déploiement de production construit l'ancien code et échoue.
 Dans la zone DNS de `bazardim.fr`, ajouter uniquement ces enregistrements. Les enregistrements existants (`@`, `www`,
 `ftp`, MX, SPF) ne sont pas touchés : les sous-domaines `todo` n'entrent pas en conflit avec eux.
 
-| Sous-domaine       | Type  | Cible                              |
-| ------------------ | ----- | ---------------------------------- |
-| `todo`             | CNAME | `todo-front-prod.onrender.com.`    |
-| `api.todo`         | CNAME | `todo-api-prod.onrender.com.`      |
-| `staging.todo`     | CNAME | `todo-front-staging.onrender.com.` |
-| `api.staging.todo` | CNAME | `todo-api-staging.onrender.com.`   |
+| Sous-domaine   | Type  | Cible                              |
+| -------------- | ----- | ---------------------------------- |
+| `todo`         | CNAME | `todo-front-prod.onrender.com.`    |
+| `staging.todo` | CNAME | `todo-front-staging.onrender.com.` |
+
+**Pourquoi l'API n'a pas de domaine propre** : l'offre gratuite Render limite le compte à 2 domaines
+personnalisés (au-delà, un moyen de paiement est exigé). Le frontend relaie donc `/api/*` vers le service API
+(règle _rewrite_ de `render.yaml`). Bénéfices : un seul domaine par environnement, plus de CORS entre front et API,
+et un cookie de session interne au site — un front sur `bazardim.fr` appelant une API sur `onrender.com`
+ferait du cookie un cookie tiers, bloqué par Safari.
 
 Les cibles exactes sont affichées par Render (_Settings → Custom Domains_) : si un nom est déjà pris, Render ajoute un
 suffixe. La zone ne contient aucun enregistrement **CAA**, donc Let's Encrypt est autorisé par défaut. Render émet puis renouvelle automatiquement les certificats Let's Encrypt et
@@ -74,15 +79,16 @@ redirige HTTP vers HTTPS.
 **Vérifications**
 
 ```bash
-dig +short api.todo.bazardim.fr                         # résolution vers Render
-curl -vI https://api.todo.bazardim.fr/health 2>&1 | grep -E "subject|issuer|expire|HTTP/"
+dig +short todo.bazardim.fr                             # résolution vers Render
+curl -vI https://todo.bazardim.fr/ 2>&1 | grep -E "subject|issuer|expire|HTTP/"
+curl -s https://todo-api-prod.onrender.com/health        # API : {"status":"ok","db":"up",…}
+curl -s https://todo.bazardim.fr/api/auth/me             # API via le relais : 401 attendu sans session
 ```
 
 Puis [SSL Labs](https://www.ssllabs.com/ssltest/) sur chaque domaine (objectif : note A).
 
-> Le cookie de session est `SameSite=Lax` : il fonctionne parce que le front et l'API partagent le même site
-> (`bazardim.fr`). Sur deux adresses `*.onrender.com` (sites différents), il faudrait temporairement
-> `COOKIE_SAMESITE=none`.
+> Le cookie de session est `SameSite=Lax` et sans attribut `Domain` : il est rattaché au domaine du frontend,
+> qui relaie les appels `/api/*`. Le navigateur ne voit qu'une seule origine.
 
 ## 4. GitHub
 

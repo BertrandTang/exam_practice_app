@@ -26,6 +26,8 @@ function requestLogger(req, res, next) {
       status: res.statusCode,
       durationMs: Math.round(durationMs * 10) / 10,
       ip: req.ip,
+      // En debug (préproduction) : chaîne de proxys, pour régler TRUST_PROXY.
+      forwardedFor: logger.isDebugEnabled() ? req.headers['x-forwarded-for'] : undefined,
       userId: req.user?.id,
     });
   });

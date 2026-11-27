@@ -2,7 +2,11 @@
 #
 #   Préproduction (branche develop)        Production (branche main)
 #   staging.todo.bazardim.fr               todo.bazardim.fr
-#   api.staging.todo.bazardim.fr           api.todo.bazardim.fr
+#   └─ /api/* → todo-api-staging.onrender.com  └─ /api/* → todo-api-prod.onrender.com
+#
+# Le frontend relaie /api/* vers l'API (rewrite Render) : un seul domaine par
+# environnement, donc cookie de session interne au site (SameSite=Lax) et pas
+# de cookie tiers. L'offre gratuite limite à 2 domaines personnalisés.
 #
 # Les déploiements sont déclenchés par la CI (deploy hooks), pas à chaque commit.
 # Secrets : MONGO_URI est saisi dans le dashboard (sync: false) ;
@@ -20,8 +24,6 @@ services:
     dockerfilePath: ./backend/Dockerfile
     healthCheckPath: /health
     autoDeployTrigger: 'off'
-    domains:
-      - api.staging.todo.bazardim.fr
     envVars:
       - key: NODE_ENV
         value: production
@@ -54,15 +56,20 @@ services:
       - key: NODE_VERSION
         value: '24'
       - key: VITE_API_URL
-        value: https://api.staging.todo.bazardim.fr/api
+        value: /api
     routes:
+      # L'API est servie sous le même domaine que le frontend (proxy Render) :
+      # le cookie de session reste interne au site, sans CORS ni cookie tiers.
+      - type: rewrite
+        source: /api/*
+        destination: https://todo-api-staging.onrender.com/api/*
       - type: rewrite
         source: /*
         destination: /index.html
     headers:
       - path: /*
         name: Content-Security-Policy
-        value: "default-src 'self'; connect-src 'self' https://api.staging.todo.bazardim.fr; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        value: "default-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
       - path: /*
         name: X-Frame-Options
         value: DENY
@@ -84,8 +91,6 @@ services:
     dockerfilePath: ./backend/Dockerfile
     healthCheckPath: /health
     autoDeployTrigger: 'off'
-    domains:
-      - api.todo.bazardim.fr
     envVars:
       - key: NODE_ENV
         value: production
@@ -118,15 +123,20 @@ services:
       - key: NODE_VERSION
         value: '24'
       - key: VITE_API_URL
-        value: https://api.todo.bazardim.fr/api
+        value: /api
     routes:
+      # L'API est servie sous le même domaine que le frontend (proxy Render) :
+      # le cookie de session reste interne au site, sans CORS ni cookie tiers.
+      - type: rewrite
+        source: /api/*
+        destination: https://todo-api-prod.onrender.com/api/*
       - type: rewrite
         source: /*
         destination: /index.html
     headers:
       - path: /*
         name: Content-Security-Policy
-        value: "default-src 'self'; connect-src 'self' https://api.todo.bazardim.fr; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        value: "default-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
       - path: /*
         name: X-Frame-Options
         value: DENY

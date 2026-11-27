@@ -7,7 +7,7 @@
  */
 import axios from 'axios';
 
-/** URL de base de l'API (ex. https://api.todo.bazardim.fr/api). */
+/** URL de base de l'API (ex. /api derrière le relais Render, http://localhost:5050/api en local). */
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({

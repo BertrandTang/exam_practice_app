@@ -67,7 +67,7 @@ const env = Object.freeze({
     .map((o) => o.trim())
     .filter(Boolean),
   cookieSecure: process.env.COOKIE_SECURE ? process.env.COOKIE_SECURE === 'true' : isProduction,
-  // "lax" par défaut : front et API sur le même site (todo.bazardim.fr / api.todo.bazardim.fr).
+  // "lax" par défaut : en production le front relaie /api/* vers l'API, même origine pour le navigateur.
   // "none" seulement si front et API sont sur des sites différents (ex. *.onrender.com).
   cookieSameSite: ['lax', 'strict', 'none'].includes(process.env.COOKIE_SAMESITE)
     ? process.env.COOKIE_SAMESITE

@@ -16,12 +16,15 @@ render.yaml          Infrastructure Render : préproduction (develop) et product
 docs/                Déploiement, supervision, consigne
 ```
 
-| Environnement | Branche   | Frontend                         | API                                  |
-| ------------- | --------- | -------------------------------- | ------------------------------------ |
-| Local         | —         | http://localhost:5173            | http://localhost:5050/api            |
-| Docker local  | —         | http://localhost:8080            | http://localhost:5050/api            |
-| Préproduction | `develop` | https://staging.todo.bazardim.fr | https://api.staging.todo.bazardim.fr |
-| Production    | `main`    | https://todo.bazardim.fr         | https://api.todo.bazardim.fr         |
+| Environnement | Branche   | Frontend                         | API                                      |
+| ------------- | --------- | -------------------------------- | ---------------------------------------- |
+| Local         | —         | http://localhost:5173            | http://localhost:5050/api                |
+| Docker local  | —         | http://localhost:8080            | http://localhost:5050/api                |
+| Préproduction | `develop` | https://staging.todo.bazardim.fr | https://staging.todo.bazardim.fr/api (¹) |
+| Production    | `main`    | https://todo.bazardim.fr         | https://todo.bazardim.fr/api (¹)         |
+
+(¹) Render relaie `/api/*` vers le service API (`todo-api-*.onrender.com`) : frontend et API partagent le même
+domaine, le cookie de session n'est donc jamais un cookie tiers.
 
 > Sur macOS, le port 5000 est occupé par le récepteur AirPlay : l'API est exposée sur **5050** en local.
 
