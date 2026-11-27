@@ -1,0 +1,25 @@
+server {
+    listen 8080;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+    server_tokens off;
+
+    # En-têtes de sécurité
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Content-Security-Policy "default-src 'self'; connect-src 'self' ${API_ORIGIN}; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" always;
+
+    # Fichiers versionnés par Vite : cache long
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header X-Content-Type-Options "nosniff" always;
+    }
+
+    # Application monopage : toutes les routes renvoient index.html (/tasks, /login…)
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
