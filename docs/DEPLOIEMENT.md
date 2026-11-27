@@ -6,7 +6,7 @@
                      ┌──────────────── Render (région Frankfurt) ────────────────┐
 Navigateur ──HTTPS──▶│ Static Site (React)   todo.bazardim.fr                    │
                      │   /api/* ──rewrite──▶ Web Service Docker                  │──TLS──▶ MongoDB Atlas (M0)
-                     │                       todo-api-prod.onrender.com          │
+                     │                       todo-api-prod-cob9.onrender.com          │
                      └───────────────────────────────────────────────────────────┘
 DNS : zone bazardim.fr chez OVH (CNAME)   Certificats : Let's Encrypt, gérés par Render
 ```
@@ -81,7 +81,7 @@ redirige HTTP vers HTTPS.
 ```bash
 dig +short todo.bazardim.fr                             # résolution vers Render
 curl -vI https://todo.bazardim.fr/ 2>&1 | grep -E "subject|issuer|expire|HTTP/"
-curl -s https://todo-api-prod.onrender.com/health        # API : {"status":"ok","db":"up",…}
+curl -s https://todo-api-prod-cob9.onrender.com/health        # API : {"status":"ok","db":"up",…}
 curl -s https://todo.bazardim.fr/api/auth/me             # API via le relais : 401 attendu sans session
 ```
 
