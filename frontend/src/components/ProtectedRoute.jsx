@@ -22,8 +22,7 @@ export function ProtectedRoute({ children }) {
 }
 
 /**
- * Affiche `children` uniquement si l'utilisateur N'est PAS connecté
- * (pages de connexion / inscription), sinon redirige vers /tasks.
+ * Pages de connexion et d'inscription : redirige vers /tasks si l'utilisateur est déjà connecté.
  * @param {{ children: import('react').ReactNode }} props
  */
 export function PublicOnlyRoute({ children }) {

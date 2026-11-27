@@ -14,8 +14,7 @@ const { notFound, errorHandler } = require('./middleware/errorHandler');
 
 const app = express();
 
-// Derrière le proxy de Render : nécessaire pour obtenir la vraie IP du client
-// (journalisation, limitation des tentatives).
+// IP réelle du client derrière les proxys (voir TRUST_PROXY).
 if (env.trustProxy) app.set('trust proxy', env.trustProxy);
 
 // En-têtes de sécurité HTTP (X-Content-Type-Options, HSTS, CSP…)

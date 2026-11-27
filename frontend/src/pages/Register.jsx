@@ -1,9 +1,7 @@
 /**
  * Page d'inscription.
  *
- * Applique les mêmes règles que l'API (nom 3-30 caractères alphanumériques
- * ou . _ -, mot de passe 8-72 caractères) avant l'envoi, demande une
- * confirmation du mot de passe, puis connecte directement l'utilisateur.
+ * Mêmes règles de validation que l'API, puis connexion automatique.
  */
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router';

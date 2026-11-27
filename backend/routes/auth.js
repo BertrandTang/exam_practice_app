@@ -36,8 +36,6 @@ function cookieOptions() {
 
 /**
  * Signe un JWT pour l'utilisateur et le place dans le cookie httpOnly.
- * La signature est synchrone : plus de `throw` dans un callback qui
- * faisait planter le serveur.
  * @param {express.Response} res
  * @param {{ id: string }} user
  */
@@ -116,8 +114,6 @@ router.post('/logout', (req, res) => {
 
 /**
  * GET /api/auth/me — Renvoie l'utilisateur connecté.
- * Permet au front de savoir s'il a une session valide (le cookie
- * httpOnly n'est pas lisible en JavaScript).
  * Réponses : 200 `{ user }`, 401 non connecté ou session expirée.
  */
 router.get('/me', auth, async (req, res) => {

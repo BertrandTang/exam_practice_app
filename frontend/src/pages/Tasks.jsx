@@ -1,9 +1,7 @@
 /**
  * Page « Mes tâches » (route protégée).
  *
- * Charge les tâches de l'utilisateur, puis met la liste à jour localement
- * après chaque action (ajout, modification, suppression) sans rechargement.
- * Les erreurs de l'API sont affichées à l'utilisateur.
+ * La liste est mise à jour localement après chaque action, sans rechargement.
  */
 import { useCallback, useEffect, useState } from 'react';
 import api, { getErrorMessage } from '../api';

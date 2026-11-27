@@ -1,9 +1,5 @@
 /**
  * Gestion centralisée des erreurs.
- *
- * Avec Express 5, les erreurs levées dans les handlers async sont transmises
- * automatiquement à ce middleware : le serveur ne plante plus sur une
- * promesse rejetée.
  * @module middleware/errorHandler
  */
 const mongoose = require('mongoose');

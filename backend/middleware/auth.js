@@ -13,10 +13,6 @@ const COOKIE_NAME = 'token';
  * Vérifie le JWT présent dans le cookie httpOnly `token`.
  * En cas de succès, expose `req.user = { id }` ; sinon répond 401.
  *
- * Le token n'est plus lu depuis un en-tête rempli par le front depuis
- * localStorage : un cookie httpOnly n'est pas accessible en JavaScript,
- * ce qui empêche son vol en cas de faille XSS.
- *
  * @type {express.RequestHandler}
  */
 function auth(req, res, next) {

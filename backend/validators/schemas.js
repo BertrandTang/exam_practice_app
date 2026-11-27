@@ -1,8 +1,7 @@
 /**
  * Schémas de validation Joi des entrées utilisateur.
  *
- * Ils garantissent le type (chaîne, booléen) de chaque champ, ce qui bloque
- * notamment l'injection d'objets du type `{ "$gt": "" }` dans les requêtes MongoDB.
+ * Le typage strict des champs bloque aussi l'injection d'opérateurs MongoDB.
  * @module validators/schemas
  */
 const Joi = require('joi');
@@ -44,9 +43,7 @@ const loginSchema = Joi.object({
 });
 
 /**
- * Détecte une balise HTML (ex. <script>, <img onerror=…>). React échappe déjà
- * l'affichage, mais refuser ces contenus protège aussi tout autre client de l'API
- * (défense en profondeur contre le XSS stocké).
+ * Balise HTML (<script>, <img onerror=…>), refusée dans les tâches contre le XSS stocké.
  */
 const HTML_TAG = /<\/?[a-z!][^>]*>/i;
 

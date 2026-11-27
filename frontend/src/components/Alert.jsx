@@ -1,7 +1,5 @@
 /**
  * Message de retour à l'utilisateur (succès, erreur, information).
- * Équivalent côté React des messages « flash » : le texte vient
- * généralement du champ `msg` renvoyé par l'API.
  *
  * @param {object} props
  * @param {'success'|'error'|'info'} [props.type='info'] - Style du message.
