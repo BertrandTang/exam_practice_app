@@ -6,6 +6,7 @@
  * @module config/env
  */
 require('dotenv').config({ quiet: true });
+const { parseTrustProxy } = require('./trustProxy');
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -42,7 +43,7 @@ if (isProduction && jwtSecret.length < 32) {
  * @property {string[]} corsOrigins - Origines autorisées par CORS.
  * @property {boolean} cookieSecure - Cookie limité au HTTPS.
  * @property {'lax'|'strict'|'none'} cookieSameSite - Politique SameSite du cookie.
- * @property {number} trustProxy - Nombre de proxys de confiance.
+ * @property {number|string[]} trustProxy - Proxys de confiance (nombre ou plages d'adresses).
  * @property {string|undefined} metricsToken - Jeton de /metrics.
  * @property {string} logLevel - Niveau Winston.
  * @property {boolean} logToFile - Écriture des logs dans logs/.
@@ -72,7 +73,7 @@ const env = Object.freeze({
   cookieSameSite: ['lax', 'strict', 'none'].includes(process.env.COOKIE_SAMESITE)
     ? process.env.COOKIE_SAMESITE
     : 'lax',
-  trustProxy: Number(process.env.TRUST_PROXY) || 0,
+  trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
   metricsToken: process.env.METRICS_TOKEN || undefined,
   logLevel: process.env.LOG_LEVEL || (isProduction ? 'info' : 'debug'),
   logToFile: process.env.LOG_TO_FILE === 'true',

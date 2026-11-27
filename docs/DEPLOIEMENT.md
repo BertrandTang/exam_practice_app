@@ -8,7 +8,7 @@ Navigateur ──HTTPS──▶│ Static Site (React)   todo.bazardim.fr       
                      │   /api/* ──rewrite──▶ Web Service Docker                  │──TLS──▶ MongoDB Atlas (M0)
                      │                       todo-api-prod-cob9.onrender.com          │
                      └───────────────────────────────────────────────────────────┘
-DNS : zone bazardim.fr chez OVH (CNAME)   Certificats : Let's Encrypt, gérés par Render
+DNS : zone bazardim.fr chez OVH (CNAME)   Certificats : TLS gérés par Render (Google Trust Services)
 ```
 
 Deux environnements identiques et isolés (services, base et secrets distincts) :
@@ -73,8 +73,10 @@ et un cookie de session interne au site — un front sur `bazardim.fr` appelant 
 ferait du cookie un cookie tiers, bloqué par Safari.
 
 Les cibles exactes sont affichées par Render (_Settings → Custom Domains_) : si un nom est déjà pris, Render ajoute un
-suffixe. La zone ne contient aucun enregistrement **CAA**, donc Let's Encrypt est autorisé par défaut. Render émet puis renouvelle automatiquement les certificats Let's Encrypt et
-redirige HTTP vers HTTPS.
+suffixe. La zone ne contient aucun enregistrement **CAA**, donc toute autorité de certification est autorisée. Render émet puis
+renouvelle automatiquement les certificats (émis par Google Trust Services pour ces domaines, valables 90 jours) et
+redirige HTTP vers HTTPS (301). Vérifié le 27/11/2026 : `todo.bazardim.fr` et `staging.todo.bazardim.fr` en HTTP/2,
+certificat valide jusqu'au 25/02/2027.
 
 **Vérifications**
 
@@ -86,6 +88,15 @@ curl -s https://todo.bazardim.fr/api/auth/me             # API via le relais : 4
 ```
 
 Puis [SSL Labs](https://www.ssllabs.com/ssltest/) sur chaque domaine (objectif : note A).
+
+**IP du client** : une requête relayée traverse plusieurs proxys (Cloudflare, relais du frontend, réseau interne
+Render), visibles dans `X-Forwarded-For` (journalisé en préproduction, niveau `debug`). Le nombre de sauts varie
+selon que l'API est appelée directement ou via le frontend : `TRUST_PROXY` liste donc les plages de confiance
+(réseau privé, [plages Cloudflare](https://www.cloudflare.com/ips/), relais Render) plutôt qu'un nombre fixe.
+Express retient la première adresse non fiable en partant de la droite : l'IP réelle, non usurpable par un
+en-tête forgé. Sans ce réglage, tous les clients partageraient l'IP interne de Render et la limitation des
+tentatives de connexion bloquerait tout le monde à la fois. Si Render change d'infrastructure, vérifier les logs
+de préproduction et ajuster la liste.
 
 > Le cookie de session est `SameSite=Lax` et sans attribut `Domain` : il est rattaché au domaine du frontend,
 > qui relaie les appels `/api/*`. Le navigateur ne voit qu'une seule origine.

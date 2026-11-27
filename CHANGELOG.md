@@ -14,6 +14,9 @@ Les références `S#` (sécurité) et `B#` (bugs) renvoient à l'audit initial.
 - CI : tags d'image Docker valides sur les pull requests, actions GitHub mises à jour (fin du runtime Node 20).
 - Tests : identifiants et secrets générés aléatoirement à chaque exécution (plus aucune valeur écrite en dur).
 - Logs : en niveau `debug`, la chaîne `X-Forwarded-For` est journalisée pour régler `TRUST_PROXY`.
+- `TRUST_PROXY` accepte une liste de plages de confiance : derrière Cloudflare et le relais Render, `req.ip` est
+  l'IP réelle du client (avec `1`, tous les clients avaient l'IP interne de Render et partageaient la même limite
+  de tentatives de connexion).
 
 ## [1.0.0] — 2026-11-27
 
